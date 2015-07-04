@@ -383,6 +383,367 @@ cat << CTAG
 					}},'
 				fi
 			fi`
+			`[ -d "/sys/kernel/bigLittle_hotplug/conf" ] && BLC=/sys/kernel/bigLittle_hotplug/conf;
+			
+			if [ "$BLC" == "/sys/kernel/bigLittle_hotplug/conf" ]; then BLN="Big.Little Hotplug Tunables"; fi;
+			
+			if [ -d "$BLC" ]; then
+				if [ -f "$BLC/enabled" ]; then
+				MSMMPD=\`$BB cat $BLC/enabled\`
+					$BB echo '{ SPane:{
+						title:"'$BLN'"
+					}},
+					{ SLiveLabel:{
+						refresh:0,
+						style:italic,
+						action:"live BigLittleHotplug"
+					}},
+						{ SCheckBox:{
+							label:"Enable",
+							description:"An in kernel replacement for Qualcomms MPDecision based on Bricked hotplug. Developed by abhi08638.",
+							default:'$MSMMPD',
+							action:"generic '$BLC'/enabled"
+						}},'
+				fi
+				if [ -f "$BLC/scroff_single_core" ]; then
+				SOSC=\`$BB cat $BLC/scroff_single_core\`
+					$BB echo '{ SCheckBox:{
+							label:"Screen off Single Core",
+							description:"Use only one core if screen is off.",
+							default:'$SOSC',
+							action:"generic '$BLC'/scroff_single_core"
+						}},'
+				fi
+				if [ -f "$BLC/min_cpus" ]; then
+				MINCPU=\`$BB cat $BLC/min_cpus\`
+					$BB echo '{ SSeekBar:{
+							title:"Min CPUs",
+							description:"Minimum CPUs online at any time.",
+							min:1,
+							max:'
+								sh $DEVICE MaxCPU
+							$BB echo ',
+							step:1,
+							default:'$MINCPU',
+							action:"generic '$BLC'/min_cpus",
+					}},'
+				fi
+				if [ -f "$BLC/max_cpus" ]; then
+				MAXCPU=\`$BB cat $BLC/max_cpus\`
+					$BB echo '{ SSeekBar:{
+							title:"Max CPUs",
+							description:"Maximum CPUs online at any time.",
+							min:1,
+							max:'
+								sh $DEVICE MaxCPU
+							$BB echo ',
+							step:1,
+							default:'$MAXCPU',
+							action:"generic '$BLC'/max_cpus",
+					}},'
+				fi
+				if [ -f "$BLC/min_cpus_online" ]; then
+				MINCPU=\`$BB cat $BLC/min_cpus_online\`
+					$BB echo '{ SSeekBar:{
+							title:"Min CPUs",
+							description:"Minimum CPUs online at any time.",
+							min:1,
+							max:'
+								sh $DEVICE MaxCPU
+							$BB echo ',
+							step:1,
+							default:'$MINCPU',
+							action:"generic '$BLC'/min_cpus_online",
+					}},'
+				fi
+				if [ -f "$BLC/max_cpus_online" ]; then
+				MAXCPU=\`$BB cat $BLC/max_cpus_online\`
+					$BB echo '{ SSeekBar:{
+							title:"Max CPUs",
+							description:"Maximum CPUs online at any time.",
+							min:1,
+							max:'
+								sh $DEVICE MaxCPU
+							$BB echo ',
+							step:1,
+							default:'$MAXCPU',
+							action:"generic '$BLC'/max_cpus_online",
+					}},'
+				fi
+				if [ -f "$BLC/max_cpus_online_susp" ]; then
+				MAXCPUSOFF=\`$BB cat $BLC/max_cpus_online_susp\`
+					$BB echo '{ SSeekBar:{
+						title:"Max CPUs Screen Off",
+						description:"Maximum number of CPUs online when screen is off.",
+						min:1,
+						max:'
+							sh $DEVICE MaxCPU
+						$BB echo ',
+						step:1,
+						default:'$MAXCPUSOFF',
+						action:"generic '$BLC'/max_cpus_online_susp",
+					}},'
+				fi
+				if [ -f "$BLC/idle_freq" ]; then
+					$BB echo '{ SSeekBar:{
+							title:"Idle Frequency",
+							description:"If CPU0 is below this frequency, does not plug in CPU 1-3.",
+							action:"generic '$BLC'/idle_freq",
+							values:{'
+								sh $DEVICE CPUFrequencyList
+						$BB echo '}
+					}},'
+				fi
+				if [ -f "$BLC/boost_enabled" ]; then
+				BOOST=\`$BB cat $BLC/boost_enabled\`
+					$BB echo '{ SCheckBox:{
+							label:"Event Boost",
+							description:"This will boost your minimum CPU speed if you touch the screen or press a button.",
+							default:'$BOOST',
+							action:"generic '$BLC'/boost_enabled"
+						}},'
+				fi
+				if [ -f "$BLC/boost_time" ]; then
+				BT=\`$BB cat $BLC/boost_time\`
+					$BB echo '{ SSeekBar:{
+							title:"Boost Time",
+							description:"Time that will boost your minimum CPU speed if you touch the screen or press a button.",
+							unit:" ms",
+							min:0,
+							max:5000,
+							step:100,
+							default:'$BT',
+							action:"generic '$BLC'/boost_time",
+					}},'
+				fi
+				if [ -f "$BLC/cpus_boosted" ]; then
+				BOOST=\`$BB cat $BLC/cpus_boosted\`
+					$BB echo '{ SSeekBar:{
+						title:"Max CPUs Boosted",
+						description:"Maximum number of CPUs boosted at the same time.",
+						min:0,
+						max:'
+							sh $DEVICE MaxCPU
+						$BB echo ',
+						step:1,
+						default:'$BOOST',
+						action:"generic '$BLC'/cpus_boosted",
+					}},'
+				fi
+				if [ -f "$BLC/boost_freqs" ]; then
+					for BF in 0 1 2 3; do
+						$BB echo '{ SSeekBar:{
+							title:"Boost Frequency Core'$BF'",
+							action:"mpdboostfreq '$BF'",
+							values: {'
+								sh $DEVICE CPUFrequencyList
+							$BB echo '}
+						}},'
+					done;
+				fi
+				if [ -f "$BLC/startdelay" ]; then
+				SD=\`$BB cat $BLC/startdelay\`
+					$BB echo '{ SSeekBar:{
+							title:"Start Delay",
+							description:"Time until MPD starts to work.",
+							unit:" ms",
+							min:0,
+							max:50000,
+							step:1000,
+							default:'$SD',
+							action:"generic '$BLC'/startdelay",
+					}},'
+				fi
+				if [ -f "$BLC/delay" ]; then
+				DL=\`$BB cat $BLC/delay\`
+					$BB echo '{ SSeekBar:{
+							title:"Delay",
+							description:"Time between checks.",
+							unit:" ms",
+							min:0,
+							max:500,
+							step:5,
+							default:'$DL',
+							action:"generic '$BLC'/delay",
+					}},'
+				fi
+				if [ -f "$BLC/down_lock_duration" ]; then
+				DOWNLOCK=\`$BB cat $BLC/down_lock_duration\`
+					$BB echo '{ SSeekBar:{
+							title:"Down Lock Duration",
+							description:"Minimum interval a CPU is kept online.",
+							unit:" ms",
+							min:300,
+							max:5000,
+							step:10,
+							default:'$DOWNLOCK',
+							action:"generic '$BLC'/down_lock_duration"
+					}},'
+				fi
+				if [ -f "$BLC/pause" ]; then
+				PAUSE=\`$BB cat $BLC/pause\`
+					$BB echo '{ SSeekBar:{
+							title:"Pause",
+							description:"If something else plugs in the CPU, fall asleep for this amount of time.",
+							unit:" ms",
+							min:0,
+							max:50000,
+							step:1000,
+							default:'$PAUSE',
+							action:"generic '$BLC'/pause",
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_1_low" ]; then
+				NWNS0=\`$BB cat $BLC/nwns_threshold_1_low\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU1 Online Limit Low",
+							description:"If load is >= this value and < CPU1 Online Limit High, CPU1 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS0',
+							action:"generic '$BLC'/nwns_threshold_1_low"
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_1_high" ]; then
+				NWNS1=\`$BB cat $BLC/nwns_threshold_1_high\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU1 Online Limit High",
+							description:"If load is <= this value and > CPU1 Online Limit Low, CPU1 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS1',
+							action:"generic '$BLC'/nwns_threshold_1_high"
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_2_low" ]; then
+				NWNS2=\`$BB cat $BLC/nwns_threshold_2_low\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU2 Online Limit Low",
+							description:"If load is >= this value and < CPU2 Online Limit High, CPU2 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS2',
+							action:"generic '$BLC'/nwns_threshold_2_low"
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_2_high" ]; then
+				NWNS3=\`$BB cat $BLC/nwns_threshold_2_high\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU2 Online Limit High",
+							description:"If load is <= this value and > CPU2 Online Limit Low, CPU2 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS3',
+							action:"generic '$BLC'/nwns_threshold_2_high"
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_3_low" ]; then
+				NWNS4=\`$BB cat $BLC/nwns_threshold_3_low\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU3 Online Limit Low",
+							description:"If load is >= this value and < CPU3 Online Limit High, CPU3 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS4',
+							action:"generic '$BLC'/nwns_threshold_3_low"
+					}},'
+				fi
+				if [ -f "$BLC/nwns_threshold_3_high" ]; then
+				NWNS5=\`$BB cat $BLC/nwns_threshold_3_high\`
+					$BB echo '{ SSeekBar:{
+							title:"CPU3 Online Limit High",
+							description:"If load is <= this value and > CPU3 Online Limit Low, CPU3 will be online.",
+							min:0,
+							max:100,
+							step:1,
+							default:'$NWNS5',
+							action:"generic '$BLC'/nwns_threshold_3_high"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_1_low" ]; then
+				TWTS0=\`$BB cat $BLC/twts_threshold_1_low\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Hotplug CPU1",
+							description:"This amount of time must have passed for CPU1 to be hotplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS0',
+							action:"generic '$BLC'/twts_threshold_1_low"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_1_high" ]; then
+				TWTS1=\`$BB cat $BLC/twts_threshold_1_high\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Unplug CPU1",
+							description:"This amount of time must have passed for CPU1 to be unplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS1',
+							action:"generic '$BLC'/twts_threshold_1_high"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_2_low" ]; then
+				TWTS2=\`$BB cat $BLC/twts_threshold_2_low\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Hotplug CPU2",
+							description:"This amount of time must have passed for CPU2 to be hotplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS2',
+							action:"generic '$BLC'/twts_threshold_2_low"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_2_high" ]; then
+				TWTS3=\`$BB cat $BLC/twts_threshold_2_high\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Unplug CPU2",
+							description:"This amount of time must have passed for CPU2 to be unplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS3',
+							action:"generic '$BLC'/twts_threshold_2_high"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_3_low" ]; then
+				TWTS4=\`$BB cat $BLC/twts_threshold_3_low\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Hotplug CPU3",
+							description:"This amount of time must have passed for CPU3 to be hotplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS4',
+							action:"generic '$BLC'/twts_threshold_3_low"
+					}},'
+				fi
+				if [ -f "$BLC/twts_threshold_3_high" ]; then
+				TWTS5=\`$BB cat $BLC/twts_threshold_3_high\`
+					$BB echo '{ SSeekBar:{
+							title:"Time Threshold Unplug CPU3",
+							description:"This amount of time must have passed for CPU3 to be unplugged.",
+							unit:" ms",
+							min:0,
+							max:1000,
+							step:1,
+							default:'$TWTS5',
+							action:"generic '$BLC'/twts_threshold_3_high"
+					}},'
+				fi
+			fi`
 			`if [ -d "/sys/module/intelli_plug/parameters" ] && [ ! -f "/sys/kernel/intelli_plug/full_mode_profile" ]; then
 				$BB echo '{ SPane:{
 					title:"Intelliplug"
